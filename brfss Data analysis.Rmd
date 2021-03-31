@@ -1,0 +1,145 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+Make sure your data and R Markdown files are in the same directory. When loaded
+your data file will be called `brfss2013`. Delete this note when before you submit 
+your work. 
+
+```{r load-data}
+load("brfss2013.RData")
+```
+
+
+
+* * *
+
+## Part 1: Data
+The Behavioral Risk Factor Surveillance System (BRFSS) is a collaborative project between all of the states in the United States (US) and participating US territories and the Centers for Disease Control and Prevention (CDC). The BRFSS is administered and supported by CDC’s Population Health Surveillance Branch, under the Division of Population Health at the National Center for Chronic Disease Prevention and Health Promotion. BRFSS is an ongoing surveillance system designed to measure behavioral risk factors for the non-institutionalized adult population (18 years of age and older) residing in the US.
+In this dataset, I would like to study a few relations between arbitrary variables.
+The sample size of the dataset looks fairly large and diverse, though a few more North American Nations could have been included in the study. Had this study been conducted on Asian nations, we may not have expected similar results due to great regional diversity and variability.
+Data was collected randomly from households, which implies random sampling, hence the scope of inference of this data is GENERALIZABILITY.
+In conducting the cellular telephone version of the BRFSS questionnaire, interviewers collect data from an adult who participates by using a cellular telephone and resides in a private residence or college housing.
+Since this survey only collects data from adults who reside in a private residence or housing, the scope does not necessarily imply causality.
+
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:** 
+How does the size of a family affect health ? 
+
+**Research quesion 2:**Does smoking adversely  (at least 100 Cigarettes) cause cancer, concentration issues or coronary heart disease ?
+The effects of smoking on cancer, focus and concentration and pulmonary problems. Is there a direct and apparent co-relation between smoking and any of the three factors ?
+
+**Research quesion 3:** Is there gender bias in the workforce when it comes to pay ?
+
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button (green button with orange arrow) above. Make sure that your code is visible
+in the project you submit. Delete this note when before you submit your work.
+The variables that we would use in this project include the following :
+numadult: Number Of Adults In Household
+genhlth: General Health
+cvdcrhd4: Ever Diagnosed With Angina Or Coronary Heart Disease
+chcocncr: (Ever Told) You Had Any Other Types Of Cancer?
+income2: Income Level
+sex: Respondents Sex
+decide: Difficulty Concentrating Or Remembering
+smoke100: Smoked At Least 100 Cigarettes
+
+**Research question 1:**
+Let's first explore the data frame 
+```{r}
+dim(brfss2013)
+```
+```{r}
+names(brfss2013)
+```
+
+The variables we use in this part of the project include genhlth and  numadult.
+```{r}
+brfss2013 %>% select(genhlth) %>%  filter("numadult">2) %>% group_by(genhlth)%>% summarise(count=n())
+```
+
+```{r}
+ggplot(brfss2013 , aes(x=genhlth , fill= numadult)) + geom_bar()
+
+```
+
+
+Inference:
+
+From the plot and data , there as such is no direct relation between number of adults in a family and the general health, this is because we have not taken into consideration factors such as income, the number of working people in the family, hereditary or genetic diseases etc. However, nuclear families, with around 2 adults, seem to do well, though some of them also fall under the poor health category.
+
+
+**Research quesion 2:**
+The variables we use in this question include smoke100, chcocncr,decide and cvdcrhd4.
+
+We first plot barplots of chcocncr, decide and cvdcrhd4 and fill them with smoke100, this helps us analyze the plots.
+
+```{r}
+ggplot(brfss2013 , aes(x=chcocncr ,  fill=smoke100)) + geom_bar()
+```
+
+
+```{r}
+ggplot(brfss2013 , aes(x=decide ,  fill=smoke100)) + geom_bar()
+```
+
+
+```{r}
+ggplot(brfss2013 , aes(x=cvdcrhd4 ,  fill=smoke100)) + geom_bar()
+```
+We also filter and summarize those who smoke 100 cigarettes a day alongside the cvdcrhd4 category to check the numbers.
+
+```{r}
+brfss2013 %>% group_by(cvdcrhd4) %>% summarise(count = n())
+```
+
+
+```{r}
+brfss2013 %>%  filter(smoke100!= "No") %>% group_by(cvdcrhd4) %>% summarise(count = n())
+```
+Inference: 
+
+What seems fairly unexpected is that contrary to the popular belief, smoking at least 100 cigarettes a day does not directly affect concentration, cancer and coronary heart disease. While it is true that in the case of decide and cvdcrhd4 categories, more than 50 percent of those affected do smoke at least 100 cigarettes a day, several more people who don't have any of these problems also smoke.
+Hence, we can infer that smoking at least 100 cigarettes a day may be a contributing factor to lifestyle diseases, but not the only factor.
+
+
+**Research quesion 3:**
+We use the variables income2 and sex in this question.
+First we try to summarize income based on gender
+
+```{r}
+brfss2013%>% select(income2,sex)%>% group_by(sex)%>% summarise(count=n()) 
+```
+Then we make a boxplot of income2 and fill it with gender.
+
+```{r}
+ggplot(brfss2013 , aes(x=income2, fill=sex)) + geom_bar()
+
+```
+Contrary to the acccepted belief of the female gender earning lesser than their male counterparts in the workplace, this shows a different trend. This shows t=women empowerment at the workplace, though we cannot generalize this to every workplace, at least the trends are an indicator of social justice and fairness.
+
